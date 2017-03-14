@@ -39,6 +39,7 @@ MCP4341::MCP4341()
     , m_TCON1Clr(0x1FF ^ (1 << 2))
     , m_nLevel(0)
     , m_nBalance(128)
+    , m_pSPI(NULL)
 {
 }
 MCP4341::MCP4341(const MCP4341& orig) 
@@ -51,15 +52,17 @@ MCP4341::MCP4341(const MCP4341& orig)
     m_TCON1Clr = orig.m_TCON1Clr;
     m_nLevel = orig.m_nLevel;
     m_nBalance  = orig.m_nBalance;
+    m_pSPI = orig.m_pSPI;
 }
 MCP4341::~MCP4341() 
 {
 }
-void MCP4341::Initialise(unsigned char nDevice)
+void MCP4341::Initialise(unsigned char nDevice, MCP4341SPI2* pSPI)
 {
     // TODO The following is strictly duplicated, should this move into hardware initialisation
     // Reset chip and set volume to 0
     m_nDevice = nDevice;
+    m_pSPI = pSPI;
     // wiper A is input signal which should be disconnected when turned off
     switch(nDevice)
     {
@@ -96,24 +99,6 @@ void MCP4341::Initialise(unsigned char nDevice)
     m_TCON0Clr = 0x1FF ^ m_TCON0Set;
     m_TCON1Clr = 0x1FF ^ m_TCON1Set;
 }
-void MCP4341::Start()
-{
-    POT_RESET_LAT = 1;  // Set not reset
-    // Send initial status for TCON0 and TCON1
-    MCP4341TCON0 tcon0;
-    tcon0.tcon = 0x1FF;
-    tcon0.R0A = 0;
-    tcon0.R1A = 0;
-    MCP4341TCON1 tcon1;
-    tcon1.tcon = 0x1FF;
-    tcon1.R2A = 0;
-    tcon1.R3A = 0;
-    Write(TCON0_ADDR, tcon0.tcon);
-    unsigned long u0 = Read(TCON0_ADDR);
-    Write(TCON1_ADDR, tcon1.tcon);
-    unsigned long u1 = Read(TCON1_ADDR);
-    int n = 0;
-}
 void MCP4341::SetLevel(unsigned char nLevel)
 {
     m_nLevel = nLevel;
@@ -124,37 +109,17 @@ void MCP4341::SetBalance(unsigned char nBalance)
     m_nBalance = nBalance;
     Set();
 }
-bool MCP4341::Write(unsigned char address, unsigned short data)
-{
-    MCP4341Command Command;
-    Command.buf = 0;
-    Command.addr = address;
-    Command.cmd = 0;
-    Command.data = data;
-    unsigned long ulResult = WriteSPI2(Command.buf);
-    return (ulResult & CMDERR_MASK) == 1 ? true : false;
-}
-unsigned short MCP4341::Read(unsigned char address)
-{
-    MCP4341Command Command;
-    Command.buf = 0;
-    Command.addr = address;
-    Command.cmd = 3;
-    Command.data = 0x3FF;
-    unsigned long ulResult = WriteSPI2(Command.buf);
-    return ulResult & 0x3FF;    
-}
 void MCP4341::Set()
 {
     MCP4341TCON0 tcon0;
     MCP4341TCON1 tcon1;
-    unsigned long uStatus = Read(STATUS_ADDR);
+    unsigned long uStatus = m_pSPI->Read(STATUS_ADDR);
     MCP4341STATUS status;
     status.status = uStatus & 0x1FF;
     // Get TCON and TCON1
-    tcon0.tcon = Read(TCON0_ADDR);
-    tcon1.tcon = Read(TCON1_ADDR);
-    tcon0.tcon = Read(TCON0_ADDR);
+    tcon0.tcon = m_pSPI->Read(TCON0_ADDR);
+    tcon1.tcon = m_pSPI->Read(TCON1_ADDR);
+    tcon0.tcon = m_pSPI->Read(TCON0_ADDR);
     if ( m_nLevel == 0 )
     {
         // Disconnect wipers A terminal
@@ -176,21 +141,21 @@ void MCP4341::Set()
         // Set left and right wipers to level
         unsigned short usLeft = (m_nLevel * m_nBalance)/128;
         unsigned short usRight = (m_nLevel * (256 - m_nBalance))/128;
-        if ( !Write(m_LeftWiperAddr, usLeft ))
+        if ( !m_pSPI->Write(m_LeftWiperAddr, usLeft ))
         {
-            Write(m_LeftWiperAddr, usLeft);
+            m_pSPI->Write(m_LeftWiperAddr, usLeft);
         }
-        if ( !Write(m_RightWiperAddr, usRight))
+        if ( !m_pSPI->Write(m_RightWiperAddr, usRight))
         {
-            Write(m_RightWiperAddr, usRight);
+            m_pSPI->Write(m_RightWiperAddr, usRight);
         }
         // If Wipers disconnected connect them
         tcon0.tcon |= m_TCON0Set;
         tcon1.tcon |= m_TCON1Set;
     }
     // Set TCON registers
-    Write(TCON0_ADDR, tcon0.tcon);
-    Write(TCON1_ADDR, tcon1.tcon);
+    m_pSPI->Write(TCON0_ADDR, tcon0.tcon);
+    m_pSPI->Write(TCON1_ADDR, tcon1.tcon);
     if ( m_nLevel != 0 )
     {
         switch(m_nDevice)
@@ -210,18 +175,18 @@ void MCP4341::SendReading(IODevice* pDevice, unsigned char byCommand, unsigned c
 
     if ( byCommand == 'S')
     {
-        unsigned long uLeft = Read(m_LeftWiperAddr);    
-        unsigned long uRight = Read(m_RightWiperAddr);
-        uLeft = Read(m_LeftWiperAddr);
+        unsigned long uLeft = m_pSPI->Read(m_LeftWiperAddr);    
+        unsigned long uRight = m_pSPI->Read(m_RightWiperAddr);
+        uLeft = m_pSPI->Read(m_LeftWiperAddr);
         // send reading
         unsigned short usValue = (uLeft & 0xFF) << 8 | (uRight & 0xFF);
         SendResult(pDevice, byCommand, nDevice, usValue);
     }
     else if ( byCommand == 'I')
     {
-        unsigned long uLeft = Read(TCON0_ADDR);    
-        unsigned long uRight = Read(TCON1_ADDR);
-        uLeft = Read(TCON0_ADDR);
+        unsigned long uLeft = m_pSPI->Read(TCON0_ADDR);    
+        unsigned long uRight = m_pSPI->Read(TCON1_ADDR);
+        uLeft = m_pSPI->Read(TCON0_ADDR);
         // send reading
         unsigned short usValue = (uLeft & 0xFF) << 8 | (uRight & 0xFF);
         SendResult(pDevice, byCommand, nDevice, usValue);

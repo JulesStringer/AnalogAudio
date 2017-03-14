@@ -33,6 +33,7 @@ SOFTWARE.
 #include "MCP4341.h"
 #include "MC14052B.h"
 #include "MCP4341Balance.h"
+#include "MCP4341SPI2.h"
 
 class AnalogAudioServer : public Server
 {
@@ -48,6 +49,7 @@ private:
     MC14052B m_Mux2;
     MCP4341Balance m_BalanceControl1;
     MCP4341Balance m_BalanceControl2;
+    MCP4341SPI2 m_SPI2;
 };
 
 #endif	/* ANALOGAUDIOSERVER_H */

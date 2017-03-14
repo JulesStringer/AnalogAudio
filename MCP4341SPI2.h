@@ -20,51 +20,29 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
- * File:   AnalogAudioServer.cpp
+ * File:   CMCP4341SPI2.h
  * Author: jules
- * 
- * Created on 13 February 2017, 18:12
+ *
+ * Created on 14 March 2017, 17:14
  */
 
-#include "AnalogAudioServer.h"
-#include "BoardDef.h"
+#ifndef CMCP4341SPI2_H
+#define	CMCP4341SPI2_H
 
-AnalogAudioServer::AnalogAudioServer() 
-{
-}
+#include "..\PIC32Device\SPI2.h"
 
-AnalogAudioServer::AnalogAudioServer(const AnalogAudioServer& orig) 
+class MCP4341SPI2 : public SPI2
 {
-}
+public:
+    MCP4341SPI2();
+    MCP4341SPI2(const MCP4341SPI2& orig);
+    virtual ~MCP4341SPI2();
+    virtual void InitialiseRPR();
+    bool Write(unsigned char address, unsigned short data);
+    unsigned short Read(unsigned char address);
+    void Start();
+private:
+};
 
-AnalogAudioServer::~AnalogAudioServer() 
-{
-  
-}
+#endif	/* CMCP4341SPI2_H */
 
-void AnalogAudioServer::InitialiseDevices()
-{
-    m_SPI2.Initialise();
-    m_VolumeControl1.Initialise(1, &m_SPI2);
-    m_VolumeControl2.Initialise(2, &m_SPI2);
-    m_Mux1.Initialise(1);
-    m_Mux2.Initialise(2);
-    m_BalanceControl1.Initialise(&m_VolumeControl1);
-    m_BalanceControl2.Initialise(&m_VolumeControl2);
-    AddDevice(&m_VolumeControl1);
-    AddDevice(&m_VolumeControl2);
-    AddDevice(&m_Mux1);
-    AddDevice(&m_Mux2);
-    AddDevice(&m_BalanceControl1);
-    AddDevice(&m_BalanceControl2);
-    m_SPI2.Start();
-}
-extern "C" void RunServer()
-{
-    AnalogAudioServer svr;
-    svr.Run();
-}
-int GetBoardID()
-{
-    return SWITCH_ID;
-}

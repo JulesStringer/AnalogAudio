@@ -29,9 +29,18 @@ SOFTWARE.
 #ifndef PINDEFS_H
 #define	PINDEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <GenericTypeDefs.h>
 #include <xc.h>
 
+#ifndef __PRODL_DEFINED__
+#define __PRODL_DEFINED__ 0
+extern int PRODL;
+#endif
+    
  /* Pin assignments 
  * 
  * Naming has 3 parts or optionally 4 parts
@@ -76,6 +85,31 @@ SOFTWARE.
 #define POT_RESET_TRIS    (TRISBbits.TRISB7)
 #define POT_RESET_ANSEL   (PRODL)
 
+// POT SDI
+#define SPI2_SDI_TRIS      (TRISBbits.TRISB8)
+#define SPI2_SDI_ANSEL     (PRODL)
+#define SPI2_SDI_RPR       (RPINR11bits.SDI2R)
+#define SPI2_SDI_RPRVAL    7
+// POT SDO
+#define SPI2_SDO_TRIS      (TRISBbits.TRISB9)
+#define SPI2_SDO_ANSEL     (PRODL)
+#define SPI2_SDO_RPR       (RPOR1bits.RP8R)
+#define SPI2_SDO_RPRVAL    3
+// POT SCK
+#define SPI2_SCK_TRIS      (TRISBbits.TRISB12)
+#define SPI2_SCK_ANSEL     (ANSELBbits.ANSB12)
+#define SPI2_SCK_RPR       (RPOR2bits.RP12R)
+#define SPI2_SCK_RPRVAL    4
+// POT SS
+#define SPI2_SS_TRIS       (TRISBbits.TRISB13)
+#define SPI2_SS_ANSEL      (ANSELBbits.ANSB13)
+#define SPI2_SS_LAT        (LATBbits.LATB13)
+#define SPI2_SS_RPR        (RPOR3bits.RP13R)
+#define SPI2_SS_RPRVAL     5
 
+#ifdef __cplusplus
+}
+#endif
+    
 #endif	/* PINDEFS_H */
 

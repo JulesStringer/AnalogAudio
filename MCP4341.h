@@ -31,7 +31,7 @@ SOFTWARE.
 
 #include "../PIC32Device/ControlledDevice.h"
 class IODevice;
-
+#include "MCP4341SPI2.h"
 //
 // Addresses
 // 0 Volatile Wiper 0
@@ -49,6 +49,7 @@ class IODevice;
 //
 
 // Structures
+
 typedef union
 {
     unsigned buf : 16;
@@ -131,8 +132,8 @@ typedef union
 }MCP4341STATUS;
 
 #define STATUS_ADDR 5
-
 #define CMDERR_MASK 0x200
+
 
 class MCP4341 : public ControlledDevice
 {
@@ -140,13 +141,12 @@ public:
     MCP4341();
     MCP4341(const MCP4341& orig);
     virtual ~MCP4341();
-    virtual void Initialise(unsigned char nDevice);
+    virtual void Initialise(unsigned char nDevice, MCP4341SPI2* pSPI);
     virtual void SetLevel(unsigned char nLevel);
     virtual void SendReading(IODevice* pDevice, unsigned char byCommand, unsigned char nDevice);
     void SetBalance(unsigned char nBalance);
-    static void Start();
-    static bool Write(unsigned char address, unsigned short data);
-    static unsigned short Read(unsigned char address);
+    bool Write(unsigned char address, unsigned short data);
+    unsigned short Read(unsigned char address);
 private:
     void Set();
     unsigned char m_LeftWiperAddr;
@@ -157,6 +157,7 @@ private:
     unsigned m_TCON1Clr : 9;
     unsigned short m_nLevel;
     unsigned short m_nBalance;  // Equal is 128, 0 is left 0, right nLevel, 255 is left nLevel, right 0
+    MCP4341SPI2* m_pSPI;
 };
 
 #endif	/* MCP4341_H */
