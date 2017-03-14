@@ -21,6 +21,8 @@ These need to be installed in order to build.
 
 # Getting the software
 
+Download a zip of this project and extract it to a folder.
+Download a zip of https://github.com/JulesStringer/PIC32Device and extract it to a folder.
 
 # Building the software
 1. Start MPLABX IDE
@@ -34,9 +36,4 @@ These need to be installed in order to build.
 4. Add the files from the PIC32Device repository to the PIC32Device logical folder.
 5. Add a new logical folder AnalogAudio to your project
 6. Add the files from the AnalogAudio repository to the AnalogAudio logical folder.
-
-
-# Dependency
-This project uses a common set of base classes which are defined here:
-https://github.com/JulesStringer/PIC32Device
 
