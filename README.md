@@ -1,8 +1,8 @@
 # AnalogAudio
 AnalogAudio is a combined source selector and volume control for 2 analog audio channels.
-The software runs on the AnalogAudio board, the source of whose layout is also in this repository.
+The software runs on the AnalogAudio board, which has a PIC32MM0064GPL020 microprocessor.
 
-[Wiki]
+The board layout is also in this repository.
 
 This is a component of my Home Automation system, which is described here http://oakhousehomeautomation.wikidot.com
 The analogaudio wiki page is here http://oakhousehomeautomation.wikidot.com/analogaudio
@@ -11,13 +11,16 @@ The analogaudio wiki page is here http://oakhousehomeautomation.wikidot.com/anal
 This project was developed using:
 - MPLAB X IDE v3.35
 - xc32-gcc
-- cx32-g++
+- xc32-g++
 
 These are downloadable from Microchip:
 http://www.microchip.com/mplab/mplab-x-ide
 http://www.microchip.com/xcdemo/xcpluspromo.aspx
 
 These need to be installed in order to build.
+
+# Getting the software
+
 
 # Building the software
 1. Start MPLABX IDE
