@@ -109,6 +109,21 @@ void MCP4341::SetBalance(unsigned char nBalance)
     m_nBalance = nBalance;
     Set();
 }
+
+// Sets volume for one speaker of 218 only
+// balance setting makes no difference
+// impression that volume is significantly less than when connected directly
+// check other channel works.
+// Both channels work.
+// Removing balance makes both speakers work.
+// Some cross-talk between channels.
+// No audible difference between volume 128 and 255
+// Reason resistor has only 129 taps, if 257 required use 4361
+//
+// MOdify board layout to:
+// Set WP and RESET to ground.
+// Directly connect mux to pot inputs
+// 
 void MCP4341::Set()
 {
     MCP4341TCON0 tcon0;
@@ -139,8 +154,12 @@ void MCP4341::Set()
     else
     {
         // Set left and right wipers to level
-        unsigned short usLeft = (m_nLevel * m_nBalance)/128;
-        unsigned short usRight = (m_nLevel * (256 - m_nBalance))/128;
+//        unsigned short usLeft = (m_nLevel * m_nBalance)/128;
+        // = 128 * 128 / 128
+//        unsigned short usRight = (m_nLevel * (256 - m_nBalance))/128;
+        // - (128 * (256-128))/128
+        unsigned short usLeft = 1 + m_nLevel / 2;
+        unsigned short usRight = 1 + m_nLevel / 2;
         if ( !m_pSPI->Write(m_LeftWiperAddr, usLeft ))
         {
             m_pSPI->Write(m_LeftWiperAddr, usLeft);
